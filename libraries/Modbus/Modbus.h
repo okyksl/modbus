@@ -68,9 +68,9 @@ protected:
     void write(uint16_t address, uint8_t offset, uint8_t value); // write data with offset
 
     // Communication Layer virtual functions
-    virtual bool receive() = 0; // receive data
-    virtual RequestType process() = 0; // process data and determine request type
-    virtual bool send(ReplyType reply) = 0; // send data
+    virtual bool receive() { return false; }; // receive data
+    virtual RequestType process() { return SLAVE_MISMATCH; }; // process data and determine request type
+    virtual bool send(ReplyType reply) { return false; }; // send data
     
     // Reply functions
     ReplyType response(RequestType request); // reply to the request
