@@ -51,17 +51,26 @@ private:
 protected:
     uint8_t _slave; // slave id
     uint16_t _size[4]; // cumulative memory sizes
+    uint32_t _codes; // function code on/off bitmask
     
     uint8_t read(uint16_t address); // read data
     void write(uint16_t address, uint8_t value); // write data
     
 public:
     Modbus(uint8_t slave, const uint16_t* size);
-    
+    Modbus(uint8_t slave, const uint16_t* size, uint32_t codes);
+
     // Getters & Setters
     uint8_t getSlave();
     void setSlave(uint8_t slave);
 
+    // Enable & Disable function codes
+    uint32_t getCodes();
+    void setCodes(uint32_t codes);
+    bool isCodeEnabled(uint8_t code);
+    void setCodeEnabled(uint8_t code);
+    void setCodeDisabled(uint8_t code);
+    
     // Register Read/Write
     bool getCoil(uint16_t offset);
     bool getStatus(uint16_t offset);

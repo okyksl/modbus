@@ -1,13 +1,14 @@
 #include "Modbus.h"
 
-Modbus::Modbus(uint8_t slave, const uint16_t* size) : _slave(slave) {
+Modbus::Modbus(uint8_t slave, const uint16_t* size) : Modbus(slave, size, DEFAULT_CODES) {}
+Modbus::Modbus(uint8_t slave, const uint16_t* size, uint32_t codes) : _slave(slave), _codes(codes) {
     _size[0] = (size[0] + 8 - (size[0] % 8)) / 8;
     _size[1] = _size[0] + (size[1] + 8 - (size[1] % 8)) / 8;
     _size[2] = _size[1] + size[2] * 2;
     _size[3] = _size[2] + size[3] * 2;
     
     _memory = (uint8_t*) calloc(_size[3], sizeof(uint8_t));
-}
+};
 
 /* Read & Write Data */
 uint8_t Modbus::read(uint16_t address) {
@@ -25,6 +26,27 @@ uint8_t Modbus::getSlave() {
 
 void Modbus::setSlave(uint8_t slave) {
     _slave = slave;
+}
+
+/* Enable & Disable function codes */
+uint32_t Modbus::getCodes() {
+    return _codes;
+}
+
+void Modbus::setCodes(uint32_t codes) {
+    _codes = codes;
+}
+
+bool Modbus::isCodeEnabled(uint8_t code) {
+    return _codes & (((uint32_t)1) << (code - 1));
+}
+
+void Modbus::setCodeEnabled(uint8_t code) {
+    _codes |= (((uint32_t)1) << (code - 1));
+}
+
+void Modbus::setCodeDisabled(uint8_t code) {
+    code = code & ~(((uint32_t)1) << (code - 1));
 }
 
 /* Register Read/Write */
