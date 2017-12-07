@@ -7,6 +7,43 @@
     #include <stdlib.h>
 #endif
 
+#define DEFAULT_CODES  0x0000C03F // corresponds to all library supported functions
+
+// Function codes
+enum FunctionCode {
+    READ_COIL_STATUS   = 0x01, // Read Coils
+    READ_INPUT_STATUS  = 0x02, // Read Discrete Inputs
+    READ_HOLDING_REGS  = 0x03, // Read Holding Registers
+    READ_INPUT_REGS    = 0x04, // Read Input Registers
+    WRITE_COIL         = 0x05, // Write Single Coil
+    WRITE_REG          = 0x06, // Write Single Register
+    WRITE_COILS        = 0x0F, // Write Multiple Coils
+    WRITE_REGS         = 0x10, // Write Multiple Registers
+};
+
+// Request types
+enum RequestType {
+    SLAVE_MISMATCH     = 0x00, // Slave ID mismatch
+    SLAVE_MATCH        = 0x01, // Slave ID match
+    BROADCAST          = 0x02  // Broadcast request
+};
+
+// Reply types
+enum ReplyType {
+    NONE               = 0x00, // Don't respond
+    SUCCESS            = 0x01, // Success response
+    ECHO               = 0x02, // Echo the request back
+    EXCEPTION          = 0x03, // Exception response
+};
+
+// Exception codes
+enum ExceptionCode {
+    ILLEGAL_FUNCTION   = 0x01, // Illegal function code
+    ILLEGAL_ADDRESS    = 0x02, // Illegal data address
+    ILLEGAL_VALUE      = 0x03, // Illegal data value
+    SLAVE_FAILURE      = 0x04, // Failed to process the request
+};
+
 class Modbus {
 private:
     uint8_t* _memory; // data
