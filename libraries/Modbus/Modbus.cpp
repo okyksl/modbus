@@ -1,7 +1,9 @@
 #include "Modbus.h"
 
 Modbus::Modbus(uint8_t slave, const uint16_t* size) : Modbus(slave, size, DEFAULT_CODES) {}
-Modbus::Modbus(uint8_t slave, const uint16_t* size, uint32_t codes) : _slave(slave), _codes(codes) {
+Modbus::Modbus(uint8_t slave, const uint16_t* size, uint32_t codes) : Modbus(slave, size, codes, NULL) {};
+Modbus::Modbus(uint8_t slave, const uint16_t* size, uint32_t codes, ResponseCallback callback) :
+    _slave(slave), _codes(codes), _callback(callback) {
     _size[0] = (size[0] + 8 - (size[0] % 8)) / 8;
     _size[1] = _size[0] + (size[1] + 8 - (size[1] % 8)) / 8;
     _size[2] = _size[1] + size[2] * 2;
@@ -33,6 +35,14 @@ uint8_t Modbus::getSlave() {
 
 void Modbus::setSlave(uint8_t slave) {
     _slave = slave;
+}
+
+ResponseCallback Modbus::getCallback() {
+    return _callback;
+}
+
+void Modbus::setCallback(ResponseCallback callback) {
+    _callback = callback;
 }
 
 /* Enable & Disable function codes */

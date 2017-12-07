@@ -44,6 +44,8 @@ enum ExceptionCode {
     SLAVE_FAILURE      = 0x04, // Failed to process the request
 };
 
+typedef ReplyType (*ResponseCallback)(RequestType request, uint8_t** const buffer, uint8_t& length);
+
 class Modbus {
 private:
     uint8_t* _memory; // data
@@ -52,6 +54,7 @@ protected:
     uint8_t _slave; // slave id
     uint16_t _size[4]; // cumulative memory sizes
     uint32_t _codes; // function code on/off bitmask
+    ResponseCallback _callback; // callback for custom function codes
     
     uint8_t* _buffer; // buffer for request/response data
     uint8_t _length; // length of the buffer
@@ -63,11 +66,15 @@ protected:
 public:
     Modbus(uint8_t slave, const uint16_t* size);
     Modbus(uint8_t slave, const uint16_t* size, uint32_t codes);
+    Modbus(uint8_t slave, const uint16_t* size, uint32_t codes, ResponseCallback callback);
 
     // Getters & Setters
     uint8_t getSlave();
     void setSlave(uint8_t slave);
 
+    ResponseCallback getCallback();
+    void setCallback(ResponseCallback callback);
+    
     // Enable & Disable function codes
     uint32_t getCodes();
     void setCodes(uint32_t codes);
