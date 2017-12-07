@@ -10,6 +10,13 @@ Modbus::Modbus(uint8_t slave, const uint16_t* size, uint32_t codes) : _slave(sla
     _memory = (uint8_t*) calloc(_size[3], sizeof(uint8_t));
 };
 
+void Modbus::allocate(uint8_t length) {
+    free(_buffer);
+    
+    _length = length;
+    _buffer = (uint8_t *) malloc(_length * sizeof(uint8_t));
+}
+
 /* Read & Write Data */
 uint8_t Modbus::read(uint16_t address) {
     return _memory[address];
@@ -99,4 +106,3 @@ void Modbus::setInput(uint16_t offset, uint16_t value) {
     write(_size[1] + offset * 2, high);
     write(_size[1] + offset * 2 + 1, low);
 }
-

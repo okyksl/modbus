@@ -53,6 +53,10 @@ protected:
     uint16_t _size[4]; // cumulative memory sizes
     uint32_t _codes; // function code on/off bitmask
     
+    uint8_t* _buffer; // buffer for request/response data
+    uint8_t _length; // length of the buffer
+    
+    void allocate(uint8_t length); // reallocates buffer with given length
     uint8_t read(uint16_t address); // read data
     void write(uint16_t address, uint8_t value); // write data
     
