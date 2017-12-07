@@ -15,6 +15,9 @@ protected:
     uint8_t _slave; // slave id
     uint16_t _size[4]; // cumulative memory sizes
     
+    uint8_t read(uint16_t address); // read data
+    void write(uint16_t address, uint8_t value); // write data
+    
 public:
     Modbus(uint8_t slave, const uint16_t* size);
     

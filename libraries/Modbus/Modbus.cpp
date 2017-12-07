@@ -9,6 +9,15 @@ Modbus::Modbus(uint8_t slave, const uint16_t* size) : _slave(slave) {
     _memory = (uint8_t*) calloc(_size[3], sizeof(uint8_t));
 }
 
+/* Read & Write Data */
+uint8_t Modbus::read(uint16_t address) {
+    return _memory[address];
+}
+
+void Modbus::write(uint16_t address, uint8_t value) {
+    _memory[address] = value;
+}
+
 /* Getters & Setters */
 uint8_t Modbus::getSlave() {
     return _slave;
