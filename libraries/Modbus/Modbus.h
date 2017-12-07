@@ -24,6 +24,17 @@ public:
     // Getters & Setters
     uint8_t getSlave();
     void setSlave(uint8_t slave);
+
+    // Register Read/Write
+    bool getCoil(uint16_t offset);
+    bool getStatus(uint16_t offset);
+    uint16_t getHolding(uint16_t offset);
+    uint16_t getInput(uint16_t offset);
+    
+    void setCoil(uint16_t offset, bool value);
+    void setStatus(uint16_t offset, bool value);
+    void setHolding(uint16_t offset, uint16_t value);
+    void setInput(uint16_t offset, uint16_t value);
 };
 
 #endif /* Modbus_h */
