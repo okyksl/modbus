@@ -24,9 +24,22 @@ uint8_t Modbus::read(uint16_t address) {
     return _memory[address];
 }
 
+uint8_t Modbus::read(uint16_t address, uint8_t offset) {
+    uint8_t high = _memory[address];
+    uint8_t low = _memory[address + 1];
+    return (high << offset) | (low >> (8 - offset));
+}
+
 void Modbus::write(uint16_t address, uint8_t value) {
     _memory[address] = value;
 }
+
+void Modbus::write(uint16_t address, uint8_t offset, uint8_t value) {
+    uint8_t remaining = 8 - offset;
+    _memory[address] = ((_memory[address] >> remaining) << remaining) | (value >> offset);
+    _memory[address + 1] = (value << remaining) | ((_memory[address + 1] << offset) >> offset);
+}
+
 
 /* Getters & Setters */
 uint8_t Modbus::getSlave() {

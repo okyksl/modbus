@@ -60,8 +60,12 @@ protected:
     uint8_t _length; // length of the buffer
     
     void allocate(uint8_t length); // reallocates buffer with given length
+    
     uint8_t read(uint16_t address); // read data
+    uint8_t read(uint16_t address, uint8_t offset); // read data with offset
+
     void write(uint16_t address, uint8_t value); // write data
+    void write(uint16_t address, uint8_t offset, uint8_t value); // write data with offset
 
     // Communication Layer virtual functions
     virtual bool receive() = 0; // receive data
