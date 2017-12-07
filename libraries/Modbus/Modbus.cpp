@@ -129,3 +129,165 @@ void Modbus::setInput(uint16_t offset, uint16_t value) {
     write(_size[1] + offset * 2, high);
     write(_size[1] + offset * 2 + 1, low);
 }
+
+ReplyType Modbus::response(RequestType request) {
+    uint8_t fcode = _buffer[0];
+    if (!isCodeEnabled(fcode)) {
+        return exception(fcode, ILLEGAL_FUNCTION);
+    }
+    
+    uint16_t address = ((uint16_t) _buffer[1]) << 8 | _buffer[2];
+    uint16_t length = ((uint16_t) _buffer[3]) << 8 | _buffer[4];
+    
+    ReplyType reply;
+    switch (fcode) {
+        case READ_COIL_STATUS: {
+            if (address + length > _size[0] * 8) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            
+            uint8_t len = (length + 7) / 8;
+            allocate(2 + len);
+            _buffer[0] = fcode;
+            _buffer[1] = len;
+            
+            for (uint8_t i = 0; i < len - 1; i++) {
+                _buffer[2 + i] = read((address / 8) + i, address % 8);
+            }
+            uint8_t remaining = length % 8 == 0 ? 0 : (8 - length % 8);
+            _buffer[2 + len - 1] = (read((address / 8) + len - 1, address % 8) >> remaining) << remaining;
+            
+            reply = SUCCESS;
+            break;
+        }
+        case READ_INPUT_STATUS: {
+            if (address + length > (_size[1] - _size[0]) * 8) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            address += _size[0] * 8;
+            
+            uint8_t len = (length + 7) / 8;
+            allocate(2 + len);
+            _buffer[0] = fcode;
+            _buffer[1] = len;
+            
+            for (uint8_t i = 0; i < len - 1; i++) {
+                _buffer[2 + i] = read((address / 8) + i, address % 8);
+            }
+            uint8_t remaining = length % 8 == 0 ? 0 : (8 - length % 8);
+            _buffer[2 + len - 1] = (read((address / 8) + len - 1, address % 8) >> remaining) << remaining;
+            
+            reply = SUCCESS;
+            break;
+        }
+        case READ_HOLDING_REGS: {
+            if (address + length > (_size[3] - _size[2])) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            address += _size[2];
+            
+            uint8_t len = length * 2;
+            allocate(2 + len);
+            _buffer[0] = fcode;
+            _buffer[1] = len;
+            
+            for (uint8_t i = 0; i < len; i++) {
+                _buffer[2 + i] = read(address + i);
+            }
+            
+            reply = SUCCESS;
+            break;
+        }
+        case READ_INPUT_REGS: {
+            if (address + length > (_size[2] - _size[1])) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            address += _size[1];
+            
+            uint8_t len = length * 2;
+            allocate(2 + len);
+            _buffer[0] = fcode;
+            _buffer[1] = len;
+            
+            for (uint8_t i = 0; i < len; i++) {
+                _buffer[2 + i] = read(address + i);
+            }
+            
+            reply = SUCCESS;
+            break;
+        }
+        case WRITE_COIL: {
+            if (address > _size[0] * 8) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            
+            if (length != 0xFF00 && length != 0x0000) {
+                return exception(fcode, ILLEGAL_VALUE);
+            }
+            
+            setCoil(address, length);
+            
+            reply = ECHO;
+            break;
+        }
+        case WRITE_REG: {
+            if (address > (_size[3] - _size[2])) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            
+            setHolding(address, length);
+            
+            reply = ECHO;
+            break;
+        }
+        case WRITE_COILS: {
+            if (address + length > _size[0] * 8) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            
+            uint8_t len = _buffer[5];
+            for (uint8_t i = 0; i < len - 1; i++) {
+                write(address / 8, address % 8, _buffer[6 + i]);
+            }
+            uint8_t remaining = length % 8 == 0 ? 0 : (8 - length % 8);
+            write(address / 8 + len - 1, address % 8, ((_buffer[6 + len - 1] >> remaining) << remaining) |
+                  ((read(address / 8 + len - 1, address % 8) << (8 - remaining)) >> (8 - remaining)));
+            _length = 8;
+            
+            reply = ECHO;
+            break;
+        }
+        case WRITE_REGS: {
+            if (address + length > (_size[3] - _size[2])) {
+                return exception(fcode, ILLEGAL_ADDRESS);
+            }
+            
+            uint8_t len = _buffer[5];
+            for (uint8_t i = 0; i < len / 2; i++) {
+                setHolding(address + i, ((uint16_t)_buffer[6 + i * 2] << 8 | _buffer[6 + i * 2 + 1]));
+            }
+            _length = 8;
+            
+            reply = ECHO;
+            break;
+        }
+        default: {
+            if (_callback) {
+                return _callback(request, &_buffer, _length);
+            }
+            return exception(fcode, ILLEGAL_FUNCTION);
+        }
+    }
+    
+    if (request == BROADCAST) {
+        return NONE;
+    }
+    return reply;
+}
+
+ReplyType Modbus::exception(uint8_t fcode, ExceptionCode excode) {
+    allocate(2);
+    _buffer[1] = fcode | (1 << 7);
+    _buffer[2] = excode;
+    return EXCEPTION;
+}

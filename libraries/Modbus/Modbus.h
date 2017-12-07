@@ -72,6 +72,10 @@ protected:
     virtual RequestType process() = 0; // process data and determine request type
     virtual bool send(ReplyType reply) = 0; // send data
     
+    // Reply functions
+    ReplyType response(RequestType request); // reply to the request
+    ReplyType exception(uint8_t fcode, ExceptionCode excode); // exception reply to the request
+    
 public:
     Modbus(uint8_t slave, const uint16_t* size);
     Modbus(uint8_t slave, const uint16_t* size, uint32_t codes);
