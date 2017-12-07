@@ -105,6 +105,8 @@ public:
     void setStatus(uint16_t offset, bool value);
     void setHolding(uint16_t offset, uint16_t value);
     void setInput(uint16_t offset, uint16_t value);
+    
+    void loop(); // lifecycle loop
 };
 
 #endif /* Modbus_h */

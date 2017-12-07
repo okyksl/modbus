@@ -291,3 +291,17 @@ ReplyType Modbus::exception(uint8_t fcode, ExceptionCode excode) {
     _buffer[2] = excode;
     return EXCEPTION;
 }
+
+void Modbus::loop() {
+    if (receive()) {
+        RequestType request = process();
+        ReplyType reply = response(request);
+        if (reply != NONE) {
+            send(reply);
+        }
+        
+        free(_buffer);
+        _length = 0;
+    }
+}
+
