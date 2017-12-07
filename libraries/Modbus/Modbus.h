@@ -62,6 +62,11 @@ protected:
     void allocate(uint8_t length); // reallocates buffer with given length
     uint8_t read(uint16_t address); // read data
     void write(uint16_t address, uint8_t value); // write data
+
+    // Communication Layer virtual functions
+    virtual bool receive() = 0; // receive data
+    virtual RequestType process() = 0; // process data and determine request type
+    virtual bool send(ReplyType reply) = 0; // send data
     
 public:
     Modbus(uint8_t slave, const uint16_t* size);
