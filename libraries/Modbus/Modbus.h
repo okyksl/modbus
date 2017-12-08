@@ -80,7 +80,8 @@ public:
     Modbus(uint8_t slave, const uint16_t* size);
     Modbus(uint8_t slave, const uint16_t* size, uint32_t codes);
     Modbus(uint8_t slave, const uint16_t* size, uint32_t codes, ResponseCallback callback);
-
+    ~Modbus();
+    
     // Getters & Setters
     uint8_t getSlave();
     void setSlave(uint8_t slave);

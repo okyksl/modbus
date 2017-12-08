@@ -12,6 +12,11 @@ Modbus::Modbus(uint8_t slave, const uint16_t* size, uint32_t codes, ResponseCall
     _memory = (uint8_t*) calloc(_size[3], sizeof(uint8_t));
 };
 
+Modbus::~Modbus() {
+    free(_memory);
+    free(_buffer);
+}
+
 void Modbus::allocate(uint8_t length) {
     free(_buffer);
     
